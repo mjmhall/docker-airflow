@@ -8,7 +8,7 @@ FROM python:3.7-slim-buster
 LABEL maintainer="Puckel_"
 
 # Never prompt the user for choices on installation/configuration of packages
-ENV DEBIAN_FRONTEND noninteractive
+# ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
 # Airflow
@@ -24,6 +24,8 @@ ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 ENV LC_CTYPE en_US.UTF-8
 ENV LC_MESSAGES en_US.UTF-8
+ENV SPARK_HOME="${AIRFLOW_HOME}/spark-2.4.5-bin-hadoop2.7"
+ENV JAVA_HOME="${AIRFLOW_HOME}/jdk-14.0.1"
 
 # Disable noisy "Handling signal" log messages:
 # ENV GUNICORN_CMD_ARGS --log-level WARNING
@@ -71,7 +73,11 @@ RUN set -ex \
         /var/tmp/* \
         /usr/share/man \
         /usr/share/doc \
-        /usr/share/doc-base
+        /usr/share/doc-base \ 
+    &&  curl -L https://download.java.net/java/GA/jdk14.0.1/664493ef4a6946b186ff29eb326336a2/7/GPL/openjdk-14.0.1_linux-x64_bin.tar.gz  | \
+        tar --directory=$AIRFLOW_HOME -xzf - \
+    &&  curl -L https://mirrors.ukfast.co.uk/sites/ftp.apache.org/spark/spark-2.4.5/spark-2.4.5-bin-hadoop2.7.tgz | \
+        tar --directory=$AIRFLOW_HOME -xzf -     
 
 COPY script/entrypoint.sh /entrypoint.sh
 COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
